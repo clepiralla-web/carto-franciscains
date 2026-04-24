@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Géographie franciscaine &amp; Rationalité économique — XIIIe–XVe s.</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --parchment:  #f5eed8;
+    --parchment2: #ede3c4;
+    --ink:        #2a1f0e;
+    --ink-faded:  #5c4a2a;
+    --ink-light:  #8a7050;
+    --red:        #8b1a1a;
+    --teal:       #1a5c4a;
+    --gold:       #b8860b;
+    --blue-med:   #1a3a5c;
+    --border:     #c4a96b;
+  }
+  body { background: var(--parchment); font-family: 'EB Garamond', Georgia, serif; color: var(--ink); min-height: 100vh; overflow-x: hidden; }
+  /* Animations d'entrée [Gemini: staggered reveal] */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .page { animation: fadeIn 0.5s ease both; }
+  header { animation: fadeInUp 0.5s 0.1s ease both; }
+  .map-container { animation: fadeInUp 0.5s 0.2s ease both; }
+  .legend { animation: fadeInUp 0.4s 0.35s ease both; }
+  .regions-section { animation: fadeInUp 0.5s 0.45s ease both; }
+  /* Amélioration hover ville [Gemini] */
+  .city-dot { transition: transform 0.2s cubic-bezier(.34,1.56,.64,1); }
+  .city-dot:hover { transform: scale(1.35); filter: drop-shadow(0 3px 8px rgba(0,0,0,0.3)); }
+  /* Amélioration scrollbar panneau [Gemini] */
+  #info-panel::-webkit-scrollbar { width: 4px; }
+  #info-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  /* Amélioration bouton synthèse [Gemini] */
+  #synth-btn { transition: background 0.18s, transform 0.18s, box-shadow 0.18s; }
+  #synth-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
+  /* Amélioration region cards hover */
+  .region-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .region-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(42,31,14,0.18); }
+  /* Amélioration panel info [Gemini: glass effect subtle] */
+  #info-panel { backdrop-filter: blur(2px); }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(180,150,80,0.04) 28px, rgba(180,150,80,0.04) 29px),
+      repeating-linear-gradient(90deg, transparent, transparent 36px, rgba(180,150,80,0.03) 36px, rgba(180,150,80,0.03) 37px);
+    pointer-events: none; z-index: 0;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+  header { text-align: center; border-bottom: 2px solid var(--border); padding-bottom: 1.2rem; margin-bottom: 1.4rem; }
+  header h1 { font-family: 'Cinzel', serif; font-size: clamp(1rem, 2.5vw, 1.4rem); font-weight: 500; letter-spacing: 0.04em; color: var(--ink); line-height: 1.4; }
+  header p { font-size: 0.82rem; color: var(--ink-faded); font-style: italic; margin-top: 0.4rem; }
+  /* ── Bandeau itinéraires marchands [NOUVEAU] ── */
+  .trade-banner {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.4rem;
+    margin: 0.7rem 0 0.3rem; padding: 0.55rem 0.8rem;
+    background: rgba(184,134,11,0.08); border: 1px solid rgba(184,134,11,0.3);
+    border-radius: 3px; font-size: 0.76rem; color: var(--ink-faded); font-style: italic;
+  }
+  .trade-banner strong { color: var(--gold); font-style: normal; }
+  /* ── Section régions & analyse [NOUVEAU] ── */
+  .regions-section {
+    margin-top: 1.4rem; border-top: 1.5px solid var(--border); padding-top: 1.2rem;
+  }
+  .regions-title {
+    font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-light);
+    margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.6rem;
+  }
+  .regions-title::after { content: ''; flex: 1; height: 1px; background: var(--parchment2); }
+  .regions-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.85rem;
+  }
+  .region-card {
+    background: linear-gradient(135deg, var(--parchment2) 0%, var(--parchment) 100%);
+    border: 1.5px solid var(--border); border-radius: 4px; padding: 0.8rem 0.95rem;
+    position: relative; overflow: hidden;
+  }
+  .region-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .region-card.corridor-toscan::before  { background: #c87941; }
+  .region-card.corridor-meridional::before { background: #1a7a5c; }
+  .region-card.corridor-nord::before   { background: #4a3a7c; }
+  .region-card.corridor-anglais::before { background: #5a4a8c; }
+  .region-card-title {
+    font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 500;
+    color: var(--ink); margin-bottom: 0.35rem; line-height: 1.3;
+  }
+  .region-card-thinker {
+    font-size: 0.72rem; color: var(--ink-faded); font-style: italic;
+    margin-bottom: 0.5rem; border-bottom: 1px solid var(--parchment2); padding-bottom: 0.35rem;
+  }
+  .region-card-desc { font-size: 0.78rem; line-height: 1.65; color: var(--ink); }
+  .region-card-desc strong { color: var(--red); }
+  .region-card-desc em { color: var(--ink-faded); font-style: italic; }
+  .region-olivi-quote {
+    border-left: 2.5px solid var(--border); background: rgba(180,150,80,0.07);
+    padding: 0.35rem 0.6rem; font-style: italic; font-size: 0.76rem;
+    color: var(--ink-faded); margin: 0.5rem 0; line-height: 1.6;
+  }
+  .region-badge {
+    display: inline-block; font-size: 0.62rem; font-family: 'Cinzel', serif;
+    letter-spacing: 0.06em; padding: 0.1rem 0.4rem; border-radius: 2px;
+    margin-bottom: 0.35rem; text-transform: uppercase;
+  }
+  .badge-toscan     { background: rgba(200,121,65,0.15);  color: #8a4a1a; border: 1px solid rgba(200,121,65,0.4); }
+  .badge-meridional { background: rgba(26,122,92,0.12);   color: #0d5a3c; border: 1px solid rgba(26,122,92,0.3); }
+  .badge-nord       { background: rgba(74,58,124,0.12);   color: #3a2a6c; border: 1px solid rgba(74,58,124,0.3); }
+  .badge-anglais    { background: rgba(90,74,140,0.12);   color: #3a2a70; border: 1px solid rgba(90,74,140,0.3); }
+  .region-stats {
+    display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.55rem;
+    padding-top: 0.45rem; border-top: 1px solid var(--parchment2);
+  }
+  .region-stat-item { font-size: 0.7rem; color: var(--ink-faded); font-style: italic; }
+  .region-stat-item strong { color: var(--teal); font-style: normal; }
+  /* ── Analyse Olivi — section dédiée [NOUVEAU] ── */
+  .olivi-section {
+    margin-top: 1.2rem; padding: 0.9rem 1.1rem;
+    background: rgba(139,26,26,0.04); border: 1.5px solid rgba(139,26,26,0.2);
+    border-radius: 4px;
+  }
+  .olivi-section-title {
+    font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--red); margin-bottom: 0.7rem;
+  }
+  .olivi-concept-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.6rem; margin-top: 0.7rem;
+  }
+  .olivi-concept {
+    background: var(--parchment); border: 1px solid var(--border); border-radius: 3px;
+    padding: 0.5rem 0.65rem;
+  }
+  .olivi-concept-latin { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--red); margin-bottom: 0.15rem; }
+  .olivi-concept-fr { font-size: 0.76rem; color: var(--ink); line-height: 1.5; }
+  .olivi-concept-fr em { color: var(--ink-faded); font-style: italic; font-size: 0.72rem; }
+  /* ── Nouveaux ajouts mémoire — badge [NOUVEAU] ── */
+  .new-badge {
+    display: inline-block; font-size: 0.6rem; font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em; padding: 0.08rem 0.4rem; border-radius: 2px;
+    background: rgba(26,92,74,0.15); color: var(--teal);
+    border: 1px solid rgba(26,92,74,0.35); margin-left: 0.4rem; vertical-align: middle;
+    text-transform: uppercase;
+  }
+  .map-container { position: relative; width: 100%; background: #e8dfc0; border: 1.5px solid var(--border); border-radius: 4px; overflow: hidden; box-shadow: inset 0 0 40px rgba(100,70,20,0.12), 0 4px 20px rgba(0,0,0,0.15); }
+  .map-container svg { display: block; width: 100%; height: auto; }
+  .city-dot { cursor: pointer; transition: transform 0.2s; transform-origin: center; }
+  .city-dot:hover { transform: scale(1.25); }
+  .city-dot circle { transition: filter 0.2s; }
+  .city-dot:hover circle { filter: brightness(1.15); }
+  .city-dot.active circle { stroke-width: 3.5 !important; }
+  #info-panel {
+    position: absolute; top: 12px; right: 12px;
+    width: min(320px, 92%);
+    background: var(--parchment); border: 1.5px solid var(--border); border-radius: 3px;
+    box-shadow: 3px 4px 16px rgba(0,0,0,0.22);
+    opacity: 0; transform: translateY(-6px) scale(0.97);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    pointer-events: none; z-index: 100;
+    max-height: 84%; overflow-y: auto;
+  }
+  #info-panel.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .panel-header { background: var(--ink); color: var(--parchment); padding: 0.65rem 0.9rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; position: sticky; top: 0; z-index: 10; }
+  .panel-header-text { flex: 1; }
+  .panel-city { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 500; line-height: 1.3; }
+  .panel-thinker { font-size: 0.75rem; font-style: italic; color: var(--parchment2); margin-top: 0.15rem; }
+  .panel-close { background: none; border: none; color: var(--parchment); cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 0; opacity: 0.7; flex-shrink: 0; margin-top: 1px; }
+  .panel-close:hover { opacity: 1; }
+  .panel-body { padding: 0.75rem 0.9rem 0.9rem; }
+  .panel-tag { display: inline-block; font-size: 0.68rem; font-family: 'Cinzel', serif; letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border-radius: 2px; margin-bottom: 0.4rem; text-transform: uppercase; }
+  .tag-red  { background: #f0d8d8; color: var(--red);      border: 1px solid #d9a0a0; }
+  .tag-teal { background: #d0eae3; color: var(--teal);     border: 1px solid #8ec5b5; }
+  .tag-gold { background: #f5ecd0; color: var(--gold);     border: 1px solid #d4b86a; }
+  .tag-blue { background: #d0ddf0; color: var(--blue-med); border: 1px solid #8aa0cc; }
+  .tag-grey { background: #e8e4dc; color: #4a4030;         border: 1px solid #b8a888; }
+  .absent-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-family: 'Cinzel', serif; letter-spacing: 0.04em; padding: 0.2rem 0.5rem; border-radius: 2px; background: #fff3cd; color: #7a5800; border: 1px dashed #c8a020; margin-bottom: 0.4rem; margin-left: 0.3rem; }
+  .panel-tabs { display: flex; border-bottom: 1.5px solid var(--parchment2); margin: 0.4rem -0.9rem 0.7rem; padding: 0 0.9rem; gap: 0.2rem; }
+  .panel-tab { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.04em; padding: 0.3rem 0.7rem; border: none; background: none; cursor: pointer; color: var(--ink-light); border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: color 0.15s, border-color 0.15s; }
+  .panel-tab:hover { color: var(--ink); }
+  .panel-tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .panel-pane { display: none; }
+  .panel-pane.active { display: block; }
+
+  /* Sections dans l'onglet Contexte */
+  .ctx-section { margin-bottom: 0.8rem; }
+  .ctx-section-title {
+    font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-light);
+    border-bottom: 1px solid var(--parchment2);
+    padding-bottom: 0.2rem; margin-bottom: 0.5rem;
+  }
+  .panel-desc { font-size: 0.82rem; line-height: 1.65; color: var(--ink); }
+  .panel-desc p { margin-bottom: 0.5rem; }
+  .panel-desc p:last-child { margin-bottom: 0; }
+  .panel-desc em { color: var(--ink-faded); font-style: italic; }
+  .panel-desc strong { color: var(--red); font-weight: 600; }
+  .panel-quote { border-left: 2.5px solid var(--border); margin: 0.5rem 0; padding: 0.35rem 0.65rem; font-style: italic; font-size: 0.79rem; color: var(--ink-faded); background: rgba(180,150,80,0.07); }
+  .panel-footer { margin-top: 0.6rem; padding-top: 0.5rem; border-top: 1px solid var(--parchment2); font-size: 0.72rem; color: var(--ink-light); font-style: italic; }
+
+  /* Blocs résultats R */
+  .r-block { background: #f0e8d0; border: 1px solid #d4b86a; border-radius: 3px; padding: 0.55rem 0.7rem; margin: 0.5rem 0; font-size: 0.78rem; }
+  .r-block-title { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.06em; color: var(--ink-faded); text-transform: uppercase; margin-bottom: 0.35rem; }
+  .r-stat { display: flex; justify-content: space-between; align-items: baseline; padding: 0.18rem 0; border-bottom: 1px solid rgba(180,150,80,0.2); font-size: 0.78rem; gap: 0.5rem; }
+  .r-stat:last-child { border-bottom: none; }
+  .r-stat-label { color: var(--ink-faded); flex-shrink: 0; }
+  .r-stat-value { font-weight: 600; color: var(--ink); text-align: right; }
+  .r-stat-value.sig     { color: var(--teal); }
+  .r-stat-value.warn    { color: var(--gold); }
+  .r-stat-value.neg     { color: var(--red); }
+  .r-stat-value.neutral { color: var(--ink-faded); }
+  .r-interp { font-size: 0.76rem; color: var(--ink-faded); font-style: italic; margin-top: 0.4rem; line-height: 1.55; border-left: 2px solid var(--border); padding-left: 0.5rem; }
+  .r-missing { background: #fff8e6; border: 1px dashed #c8a020; border-radius: 3px; padding: 0.5rem 0.7rem; margin: 0.5rem 0; font-size: 0.78rem; color: #6a4800; line-height: 1.55; }
+  .r-missing strong { color: #7a5000; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; margin-top: 0.9rem; font-size: 0.78rem; color: var(--ink-faded); font-style: italic; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(0,0,0,0.2); }
+  .legend-dot.dashed { border-style: dashed; border-color: #9b4040; }
+  .instruction { text-align: center; font-size: 0.78rem; color: var(--ink-light); font-style: italic; margin-top: 0.6rem; }
+
+  /* ── Axes géographiques ── */
+  .axis-toscan  circle { stroke: #c87941 !important; stroke-width: 2.5 !important; }
+  .axis-meridional circle { stroke: #1a7a5c !important; stroke-width: 2.5 !important; }
+
+  /* ── Panneau synthèse latéral ── */
+  #synth-btn {
+    position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 200;
+    background: var(--ink); color: var(--parchment);
+    border: 1.5px solid var(--border); border-radius: 3px;
+    font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.07em;
+    padding: 0.55rem 1rem; cursor: pointer;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+    transition: background 0.18s, transform 0.15s;
+  }
+  #synth-btn:hover { background: #3a2a10; transform: translateY(-2px); }
+
+  #synth-panel {
+    position: fixed; top: 0; right: -440px; height: 100vh; width: 420px;
+    background: var(--parchment); border-left: 2px solid var(--border);
+    box-shadow: -6px 0 32px rgba(0,0,0,0.22);
+    z-index: 300; overflow-y: auto;
+    transition: right 0.32s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+  }
+  #synth-panel.open { right: 0; }
+
+  .synth-header {
+    background: var(--ink); color: var(--parchment);
+    padding: 1.1rem 1.2rem 0.9rem;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .synth-header h2 {
+    font-family: 'Cinzel', serif; font-size: 0.85rem;
+    letter-spacing: 0.06em; font-weight: 500; line-height: 1.4;
+  }
+  .synth-header p {
+    font-size: 0.72rem; color: var(--parchment2); font-style: italic;
+    margin-top: 0.3rem;
+  }
+  .synth-close {
+    position: absolute; top: 0.8rem; right: 1rem;
+    background: none; border: none; color: var(--parchment);
+    font-size: 1.1rem; cursor: pointer; opacity: 0.7;
+  }
+  .synth-close:hover { opacity: 1; }
+
+  .synth-body { padding: 1.1rem 1.2rem 2rem; flex: 1; }
+
+  .synth-section { margin-bottom: 1.4rem; }
+  .synth-section-title {
+    font-family: 'Cinzel', serif; font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-light); border-bottom: 1px solid var(--parchment2);
+    padding-bottom: 0.3rem; margin-bottom: 0.7rem;
+  }
+  .synth-body p { font-size: 0.82rem; line-height: 1.7; color: var(--ink); margin-bottom: 0.6rem; }
+  .synth-body p:last-child { margin-bottom: 0; }
+  .synth-body strong { color: var(--red); }
+  .synth-body em { color: var(--ink-faded); font-style: italic; }
+
+  .synth-problematique {
+    background: rgba(139,26,26,0.06);
+    border-left: 3px solid var(--red);
+    border-radius: 0 3px 3px 0;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 1rem;
+    font-size: 0.8rem; line-height: 1.65;
+    color: var(--ink); font-style: italic;
+  }
+
+  .synth-axis {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    padding: 0.55rem 0.7rem; border-radius: 3px; margin-bottom: 0.5rem;
+  }
+  .synth-axis.toscan  { background: rgba(200,121,65,0.1);  border: 1px solid rgba(200,121,65,0.3); }
+  .synth-axis.meridional { background: rgba(26,122,92,0.1); border: 1px solid rgba(26,122,92,0.3); }
+  .synth-axis-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .synth-axis.toscan     .synth-axis-dot { background: #c87941; }
+  .synth-axis.meridional .synth-axis-dot { background: #1a7a5c; }
+  .synth-axis-text { font-size: 0.79rem; line-height: 1.6; color: var(--ink); }
+  .synth-axis-text strong { color: var(--ink); font-weight: 600; }
+
+  .synth-result {
+    background: #f0e8d0; border: 1px solid var(--border);
+    border-radius: 3px; padding: 0.55rem 0.8rem; margin-bottom: 0.4rem;
+    font-size: 0.79rem; display: flex; justify-content: space-between; gap: 0.5rem;
+  }
+  .synth-result-label { color: var(--ink-faded); }
+  .synth-result-value { font-weight: 600; color: var(--teal); text-align: right; }
+
+  .synth-absence {
+    background: #fff8e6; border: 1px dashed #c8a020;
+    border-radius: 3px; padding: 0.6rem 0.8rem;
+    font-size: 0.78rem; line-height: 1.6; color: #6a4800;
+  }
+  .synth-absence strong { color: #7a5000; }
+
+  .synth-links { display: flex; flex-direction: column; gap: 0.5rem; }
+  .synth-link-btn {
+    display: block; text-align: center;
+    background: var(--ink); color: var(--parchment);
+    border: 1.5px solid var(--border); border-radius: 3px;
+    font-family: 'Cinzel', serif; font-size: 0.68rem;
+    letter-spacing: 0.06em; padding: 0.6rem 1rem;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.15s;
+  }
+  .synth-link-btn:hover { background: #3a2a10; }
+  .synth-link-btn.secondary {
+    background: transparent; color: var(--ink);
+    border-color: var(--border);
+  }
+  .synth-link-btn.secondary:hover { background: var(--parchment2); }
+
+  /* ── Légende axes ── */
+  .axis-legend {
+    display: flex; gap: 1.2rem; flex-wrap: wrap;
+    margin-top: 0.5rem; font-size: 0.78rem;
+  }
+  .axis-legend-item { display: flex; align-items: center; gap: 0.4rem; color: var(--ink-faded); font-style: italic; }
+  .axis-legend-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+  .axis-legend-dot.toscan { background: rgba(200,121,65,0.3); border-color: #c87941; }
+  .axis-legend-dot.meridional { background: rgba(26,122,92,0.3); border-color: #1a7a5c; }
+
+  /* overlay quand panneau ouvert */
+  #synth-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.18); z-index: 250;
+  }
+  #synth-overlay.active { display: block; }
+
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+  <h1>Géographie franciscaine &amp; Rationalité économique — XIIIe–XVe siècle<br>
+  <span style="font-size:0.8em;font-weight:400;color:var(--ink-faded)">Implantations de l'Ordre · Penseurs clés · Résultats statistiques (R · QGIS · DARMC)</span></h1>
+  <p>C. Piralla — d'après Giacomo Todeschini, <em>Richesse franciscaine</em> (2008) · Analyse spatiale DARMC</p>
+  <!-- Bandeau des itinéraires marchands [NOUVEAU — d'après p.118 du mémoire] -->
+  <div class="trade-banner">
+    <span><strong>Itinéraires marchands :</strong></span>
+    <span>🧶 Laine (Angleterre → Flandres → Italie)</span>
+    <span>🪡 Soieries (Orient → Gênes → foires de Champagne)</span>
+    <span>🌿 Épices (Levant → Marseille → réseau continental)</span>
+    <span style="color:var(--ink-light);font-size:0.72rem">Ces flux convergent autour des villes franciscaines — cf. Todeschini, <em>Richesse franciscaine</em>, p. 118</span>
+  </div>
+</header>
+
+  <div class="map-container">
+    <svg viewBox="0 0 800 535" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="map-clip"><rect x="0" y="0" width="800" height="535"/></clipPath>
+    </defs>
+    <!-- Cover GeoTIFF sea labels (Hibernian Ocean, Cantabric Sea) -->
+    <rect x="0" y="14" width="260" height="90" fill="rgb(210,228,245)" opacity="1"/>
+    <rect x="0" y="260" width="248" height="84" fill="rgb(210,228,245)" opacity="1"/>
+    <image href="data:image/png;base64,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" x="0" y="0" width="800" height="535" preserveAspectRatio="none"/>
+    <g clip-path="url(#map-clip)">
+      <path d="M3.0,324.2 L80.7,347.7 L95.6,376.2 M60.4,427.0 L128.5,426.0 L147.0,454.6 L133.9,482.0 L147.4,508.0 L226.4,455.9 L225.5,438.6 L266.9,395.6 L307.2,390.8 L332.9,371.5 L329.6,347.2 L335.1,339.1 L373.3,323.9 L392.1,267.5 L498.8,305.4 L534.0,310.1 L550.2,336.3 L573.8,341.4 L607.9,371.7 L650.5,390.6 L634.1,376.4 L607.7,361.7 L602.8,355.7 L591.0,329.5 L568.9,318.1 L552.5,299.9 L564.9,247.2 L564.5,215.2 L544.0,181.5 L550.0,158.6 L576.9,106.4 L541.5,66.8 L545.3,24.8 L592.9,20.2 L617.2,41.9 L650.5,20.8 L694.6,-0.7 L726.3,13.2 L696.5,103.3 L699.1,130.7 L682.3,175.3 L678.9,199.9 L741.6,199.1 L751.0,246.1 L761.0,255.3 L773.9,261.0" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M265.9,394.1 L232.5,380.4 L127.2,427.2 L94.9,376.0 L82.3,349.8 L178.7,355.2 L192.9,354.4 L229.6,375.5 L187.7,355.2 L180.2,353.6 L181.5,342.8 L221.9,329.9 L321.8,205.1 L330.7,170.3 L222.5,194.8 L220.2,175.1 L218.5,192.7 L330.0,175.7 L325.9,164.3 L296.4,160.8 L329.6,165.1 L349.2,112.6 L366.5,118.0 L526.8,41.5 L549.8,31.3 L593.1,23.3 L627.6,42.2 L696.0,-0.4 L732.4,10.1 L774.8,-1.7" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M367.9,122.2 L387.8,200.7 L452.5,252.3 L468.0,270.7 L516.6,275.3 L595.2,277.3 L595.2,264.0 L629.0,240.8 L676.7,198.1 L681.6,174.0 L637.9,179.9 L570.3,162.2 L549.6,162.0 L488.3,143.9 L456.0,187.0 L453.8,206.7 L507.2,273.4 L497.2,303.0" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M325.8,174.7 L384.4,197.2 L390.3,273.2" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M288.6,65.4 L281.7,101.2" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M453.1,182.0 L371.8,136.9 L365.8,116.5 L367.9,109.5 L445.4,119.0 L487.0,146.1 L577.2,104.3 L539.4,70.0 L549.7,24.3 L511.8,40.8" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M533.5,308.8 L593.8,305.0 L625.3,326.9 L645.0,352.0 L678.9,368.2 L721.3,381.8 L746.5,399.3" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M375.4,322.2 L398.3,332.8 L401.3,343.0" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M753.8,330.7 L797.7,300.0" fill="none" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.6"/>
+      <path d="M289.5,0.4 L304.9,31.5 L292.4,57.5 L331.8,56.8 L334.2,68.5 L320.0,86.7 L308.0,97.9 L343.5,104.5 L312.3,118.6 L234.3,141.2 L217.3,154.5 L151.9,168.5 L130.9,179.7 L144.8,194.9 L167.0,206.3 L178.9,220.5 L193.6,247.7 L205.7,271.2 L203.0,293.0 L180.7,315.1 L155.1,321.7 L40.8,291.0 L21.9,295.2 M-6.2,505.4 L43.0,525.9 L100.8,535.9 L147.9,528.7 L204.9,509.3 L238.0,486.9 L258.5,455.7 L267.7,422.2 L293.5,399.5 L320.2,398.1 L350.9,381.4 L388.9,356.9 L427.5,352.4 L471.3,347.0 L496.0,309.9 L525.5,348.1 L571.9,381.2 L665.7,408.3 L699.3,448.7 L703.3,485.5 L723.5,495.8 L782.8,461.3 L790.2,410.7 L794.0,394.1" fill="none" stroke="#2a5a7a" stroke-width="1.6" stroke-dasharray="7,4" opacity="0.5"/>
+      <path d="M540.1,-4.3 L551.3,23.4 L595.0,8.7 L639.5,-2.1" fill="none" stroke="#2a5a7a" stroke-width="1.6" stroke-dasharray="7,4" opacity="0.5"/>
+      <path d="M358.9,100.8 L369.9,41.6 L392.2,10.2 M368.3,33.9 L423.3,21.5 L516.9,39.3" fill="none" stroke="#2a5a7a" stroke-width="1.6" stroke-dasharray="7,4" opacity="0.5"/>
+      <path d="M308.9,395.8 L283.2,427.8 L284.7,443.7 L298.8,450.9 L334.5,449.4 L336.3,466.5 L401.6,478.0 L512.7,485.1 L534.8,496.4 L551.1,514.0 L570.4,503.1 L588.4,520.4 M791.4,519.8 L792.7,508.9 L723.9,498.0 L796.5,509.7 M787.9,390.7 L798.0,353.1 L772.5,351.6 L755.1,336.9 L695.7,336.6 L652.1,308.5 L592.6,273.4" fill="none" stroke="#2a5a7a" stroke-width="1.6" stroke-dasharray="7,4" opacity="0.5"/>
+      <path d="M103.9,537.7 L158.6,541.4 L229.8,529.2 L272.1,508.1 L300.2,470.4 L326.0,447.7 L334.8,463.8" fill="none" stroke="#2a5a7a" stroke-width="1.6" stroke-dasharray="7,4" opacity="0.5"/>
+      <path d="M565.2,303.8 L599.8,345.0" stroke="#c87941" stroke-width="2.5" stroke-dasharray="7,5" fill="none" opacity="0.65"/>
+      <path d="M599.8,345.0 L562.9,324.8" stroke="#c87941" stroke-width="2.5" stroke-dasharray="7,5" fill="none" opacity="0.65"/>
+      <path d="M339.1,341.7 L499.8,306.3" stroke="#1a7a5c" stroke-width="2.2" stroke-dasharray="7,5" fill="none" opacity="0.55"/>
+      <path d="M339.1,341.7 L316.0,393.7" stroke="#1a7a5c" stroke-width="2.2" stroke-dasharray="7,5" fill="none" opacity="0.55"/>      <polygon points="352.4,102.6 357.4,112.6 347.4,112.6" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Bruges"/>
+      <text x="360.4" y="111.6" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Bruges</text>
+      <polygon points="285.2,55.6 290.2,65.6 280.2,65.6" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Boston"/>
+      <text x="293.2" y="64.6" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Boston</text>
+      <polygon points="445.8,114.9 450.8,124.9 440.8,124.9" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Cologne"/>
+      <text x="453.8" y="123.9" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Cologne</text>
+      <polygon points="546.7,26.0 551.7,36.0 541.7,36.0" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Lübeck"/>
+      <text x="554.7" y="35.0" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Lübeck</text>
+      <polygon points="517.3,39.0 522.3,49.0 512.3,49.0" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Hambourg"/>
+      <text x="525.3" y="48.0" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Hambourg</text>
+      <polygon points="491.1,141.3 496.1,151.3 486.1,151.3" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Francfort"/>
+      <text x="499.1" y="150.3" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Francfort</text>
+      <polygon points="551.8,157.9 556.8,167.9 546.8,167.9" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Augsbourg"/>
+      <text x="559.8" y="166.9" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Augsbourg</text>
+      <polygon points="589.0,267.4 594.0,277.4 584.0,277.4" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Venise"/>
+      <text x="597.0" y="276.4" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Venise</text>
+      <polygon points="570.2,336.9 575.2,346.9 565.2,346.9" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Sienne"/>
+      <text x="578.2" y="345.9" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Sienne</text>
+      <polygon points="506.6,268.8 511.6,278.8 501.6,278.8" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Milan"/>
+      <text x="514.6" y="277.8" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Milan</text>
+      <polygon points="386.4,194.0 391.4,204.0 381.4,204.0" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Troyes"/>
+      <text x="394.4" y="203.0" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Troyes</text>
+      <polygon points="363.1,115.5 368.1,125.5 358.1,125.5" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Gand"/>
+      <text x="371.1" y="124.5" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Gand</text>
+      <polygon points="268.3,79.6 273.3,89.6 263.3,89.6" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Northampton"/>
+      <text x="276.3" y="88.6" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Northampton</text>
+      <polygon points="270.7,107.4 275.7,117.4 265.7,117.4" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Winchester"/>
+      <text x="278.7" y="116.4" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Winchester</text>
+      <polygon points="576.9,99.2 581.9,109.2 571.9,109.2" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Leipzig"/>
+      <text x="584.9" y="108.2" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Leipzig</text>
+      <polygon points="683.0,169.7 688.0,179.7 678.0,179.7" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Vienne"/>
+      <text x="691.0" y="178.7" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Vienne</text>
+      <polygon points="664.5,130.7 669.5,140.7 659.5,140.7" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Prague"/>
+      <text x="672.5" y="139.7" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Prague</text>
+      <polygon points="763.8,116.4 768.8,126.4 758.8,126.4" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Cracovie"/>
+      <text x="771.8" y="125.4" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Cracovie</text>
+      <polygon points="710.0,371.1 715.0,381.1 705.0,381.1" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Bari"/>
+      <text x="718.0" y="380.1" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Bari</text>
+      <polygon points="654.9,393.2 659.9,403.2 649.9,403.2" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Naples"/>
+      <text x="662.9" y="402.2" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Naples</text>
+      <polygon points="746.0,394.7 751.0,404.7 741.0,404.7" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Tarente"/>
+      <text x="754.0" y="403.7" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Tarente</text>
+      <polygon points="547.6,181.8 552.6,191.8 542.6,191.8" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Augsbourg"/>
+      <text x="555.6" y="190.8" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Augsbourg</text>
+      <polygon points="96.0,370.7 101.0,380.7 91.0,380.7" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Medina del Campo"/>
+      <text x="104.0" y="379.7" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Medina del Campo</text>
+      <polygon points="127.6,421.8 132.6,431.8 122.6,431.8" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Tolède"/>
+      <text x="135.6" y="430.8" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Tolède</text>
+      <polygon points="388.5,266.6 393.5,276.6 383.5,276.6" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Lyon"/>
+      <text x="396.5" y="275.6" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Lyon</text>
+      <polygon points="382.6,312.3 387.6,322.3 377.6,322.3" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.75" title="Avignon"/>
+      <text x="390.6" y="321.3" font-family="EB Garamond,serif" font-size="9" fill="#2a1a00" opacity="0.75">Avignon</text>
+      <text x="474.6" y="448.2" text-anchor="middle" font-family="EB Garamond,serif" font-style="italic" font-size="11" fill="#2a4a6a" opacity="0.85">Mare Mediterraneum</text>
+      <g class="city-dot" data-city="assise" onclick="showPanel('assise')" style="cursor:pointer">
+        <circle cx="599.8" cy="345.0" r="11" fill="#c87941" stroke="#f5eed8" stroke-width="2" stroke-dasharray="4,3" opacity="0.93"/>
+        <text x="599.8" y="349.0" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">ASS</text>
+      </g>
+      <text x="613.8" y="341.0" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Assise</text>
+      <text x="613.8" y="355.0" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Saint François</text>
+      <g class="city-dot" data-city="paris" onclick="showPanel('paris')" style="cursor:pointer">
+        <circle cx="321.3" cy="177.6" r="11" fill="#1a5c4a" stroke="#f5eed8" stroke-width="2" opacity="0.93"/>
+        <text x="321.3" y="181.6" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">PAR</text>
+      </g>
+      <text x="335.3" y="173.6" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Paris</text>
+      <text x="335.3" y="187.6" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Bonaventure</text>
+      <g class="city-dot" data-city="marseille" onclick="showPanel('marseille')" style="cursor:pointer">
+        <circle cx="403.2" cy="338.4" r="11" fill="#1a5c4a" stroke="#f5eed8" stroke-width="2" opacity="0.93"/>
+        <text x="403.2" y="342.4" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">MRS</text>
+      </g>
+      <text x="417.2" y="334.4" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Marseille</text>
+      <text x="417.2" y="348.4" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Hugues de Digne</text>
+      <g class="city-dot" data-city="toulouse" onclick="showPanel('toulouse')" style="cursor:pointer">
+        <circle cx="296.8" cy="329.6" r="11" fill="#b8860b" stroke="#f5eed8" stroke-width="2" opacity="0.93"/>
+        <text x="296.8" y="333.6" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">TOU</text>
+      </g>
+      <text x="310.8" y="325.6" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Toulouse</text>
+      <text x="310.8" y="339.6" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Guiral Ot</text>
+      <g class="city-dot" data-city="genes" onclick="showPanel('genes')" style="cursor:pointer">
+        <circle cx="499.8" cy="306.3" r="11" fill="#1a7a5c" stroke="#f5eed8" stroke-width="2" opacity="0.93"/>
+        <text x="499.8" y="310.3" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">GEN</text>
+      </g>
+      <text x="513.8" y="302.3" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Gênes</text>
+      <text x="513.8" y="316.3" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Alex. d'Alexandrie</text>
+      <g class="city-dot" data-city="barcelone" onclick="showPanel('barcelone')" style="cursor:pointer">
+        <circle cx="316.0" cy="393.7" r="11" fill="#1a7a5c" stroke="#f5eed8" stroke-width="2" opacity="0.93"/>
+        <text x="316.0" y="397.7" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">BCN</text>
+      </g>
+      <text x="330.0" y="389.7" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Barcelone</text>
+      <text x="330.0" y="403.7" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Eiximenis</text>
+      <g class="city-dot" data-city="florence" onclick="showPanel('florence')" style="cursor:pointer">
+        <circle cx="562.9" cy="324.8" r="11" fill="#1a3a5c" stroke="#f5eed8" stroke-width="2" opacity="0.93"/>
+        <text x="562.9" y="328.8" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">FLO</text>
+      </g>
+      <text x="576.9" y="320.8" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Florence</text>
+      <text x="576.9" y="334.8" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">★ Rang 3 btw</text>
+      <g class="city-dot" data-city="narbonne" onclick="showPanel('narbonne')" style="cursor:pointer">
+        <circle cx="339.1" cy="341.7" r="11" fill="#1a7a5c" stroke="#f5eed8" stroke-width="2" stroke-dasharray="4,3" opacity="0.93"/>
+        <text x="339.1" y="345.7" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">NAR</text>
+      </g>
+      <text x="353.1" y="337.7" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Narbonne</text>
+      <text x="353.1" y="351.7" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Olivi</text>
+      <g class="city-dot" data-city="bologne" onclick="showPanel('bologne')" style="cursor:pointer">
+        <circle cx="565.2" cy="303.8" r="11" fill="#c87941" stroke="#f5eed8" stroke-width="2" stroke-dasharray="4,3" opacity="0.93"/>
+        <text x="565.2" y="307.8" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">BOL</text>
+      </g>
+      <text x="579.2" y="299.8" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Bologne</text>
+      <text x="579.2" y="313.8" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">★ Rang 1 btw</text>
+      <g class="city-dot" data-city="londres" onclick="showPanel('londres')" style="cursor:pointer">
+        <circle cx="254.4" cy="135.0" r="11" fill="#5a4a8c" stroke="#f5eed8" stroke-width="2" stroke-dasharray="4,3" opacity="0.93"/>
+        <text x="254.4" y="139.0" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">LON</text>
+      </g>
+      <text x="268.4" y="131.0" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Londres</text>
+      <text x="268.4" y="145.0" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Jean Peckham</text>
+      <g class="city-dot" data-city="oxford" onclick="showPanel('oxford')" style="cursor:pointer">
+        <circle cx="223.5" cy="93.9" r="11" fill="#4a3a7c" stroke="#f5eed8" stroke-width="2" opacity="0.93"/>
+        <text x="223.5" y="97.9" text-anchor="middle" font-family="EB Garamond,serif" font-size="8" fill="white" font-weight="bold">OXF</text>
+      </g>
+      <text x="237.5" y="89.9" text-anchor="start" font-family="EB Garamond,serif" font-size="11" fill="#1a0e00" font-weight="600">Oxford</text>
+      <text x="237.5" y="103.9" text-anchor="start" font-family="EB Garamond,serif" font-style="italic" font-weight="600" font-size="9" fill="#3a2510">Adam Marsh · Duns Scot</text>
+    </g>
+    <!-- Légende -->
+    <rect x="0" y="495" width="800" height="40" fill="#e8dfc0" opacity="0.90"/>
+    <line x1="10" y1="507" x2="32" y2="507" stroke="#6a5a3a" stroke-width="1.4" stroke-dasharray="5,4" opacity="0.85"/>
+    <text x="36" y="511" font-family="EB Garamond,serif" font-style="italic" font-size="10" fill="#2a1a00">Routes terrestres (DARMC)</text>
+    <line x1="10" y1="523" x2="32" y2="523" stroke="#2a5a7a" stroke-width="1.6" stroke-dasharray="7,4" opacity="0.85"/>
+    <text x="36" y="527" font-family="EB Garamond,serif" font-style="italic" font-size="10" fill="#2a1a00">Routes maritimes (DARMC)</text>
+    <line x1="192" y1="507" x2="214" y2="507" stroke="#c87941" stroke-width="2.5" stroke-dasharray="7,5" opacity="0.85"/>
+    <text x="218" y="511" font-family="EB Garamond,serif" font-style="italic" font-size="10" fill="#2a1a00">Corridor toscan-ombrien</text>
+    <line x1="192" y1="523" x2="214" y2="523" stroke="#1a7a5c" stroke-width="2.2" stroke-dasharray="7,5" opacity="0.85"/>
+    <text x="218" y="527" font-family="EB Garamond,serif" font-style="italic" font-size="10" fill="#2a1a00">Axe méridional occidental</text>
+    <circle cx="390" cy="507" r="6" fill="#1a5c4a" stroke="#f5eed8" stroke-width="1.5"/>
+    <text x="400" y="511" font-family="EB Garamond,serif" font-style="italic" font-size="10" fill="#2a1a00">Pôle franciscain (Todeschini)</text>
+    <polygon points="390,521 395,530 385,530" fill="#4a4030" stroke="#e8dfc0" stroke-width="0.9" opacity="0.85"/>
+    <text x="400" y="527" font-family="EB Garamond,serif" font-style="italic" font-size="10" fill="#2a1a00">Ville marchande (DARMC)</text>
+    <rect x="2" y="2" width="796" height="531" fill="none" stroke="#a8915a" stroke-width="1.5" opacity="0.4"/>
+  </svg>
+
+    <div id="info-panel">
+      <div class="panel-header">
+        <div class="panel-header-text">
+          <div class="panel-city" id="panel-city">—</div>
+          <div class="panel-thinker" id="panel-thinker">—</div>
+        </div>
+        <button class="panel-close" onclick="closePanel()">✕</button>
+      </div>
+      <div class="panel-body">
+        <div id="panel-tag-row"></div>
+        <div class="panel-tabs">
+          <button class="panel-tab active" onclick="switchTab('contexte',this)">Contexte</button>
+          <button class="panel-tab" onclick="switchTab('resultats',this)">Résultats R</button>
+        </div>
+        <div class="panel-pane active" id="pane-contexte">
+          <div id="panel-ctx"></div>
+        </div>
+        <div class="panel-pane" id="pane-resultats">
+          <div id="panel-r"></div>
+        </div>
+        <div class="panel-footer" id="panel-footer"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#8b1a1a"></div> Nœud central (Olivi / Eiximenis)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1a5c4a"></div> Pôle théologique franciscain</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#b8860b"></div> Foyer originel / transmission</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4a3a7c"></div> Centre universitaire</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1a3a5c"></div> Pôle commercial (★ top 20)</div>
+    <div class="legend-item"><div class="legend-dot dashed" style="background:#c45a54"></div> Position interpolée (◌)</div>
+  </div>
+  
+    <div class="axis-legend">
+      <div class="axis-legend-item"><div class="axis-legend-dot toscan"></div> Corridor toscan-ombrien (Bologne–Assise–Florence)</div>
+      <div class="axis-legend-item"><div class="axis-legend-dot meridional"></div> Axe méridional occidental (Narbonne–Gênes–Barcelone)</div>
+    </div>
+  <p class="instruction">↑ Cliquer sur une ville pour afficher le contexte historique et les résultats statistiques · [Échap] pour fermer · Les villes en pointillé ont été ajoutées par interpolation géographique · Sources : DARMC, Todeschini (2008) · C. Piralla (M1 2026)</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION RÉGIONS & ANALYSE GÉOGRAPHIQUE [NOUVEAU]
+     D'après p.118 du mémoire : itinéraires marchands, penseurs franciscains,
+     analyse olivienne de la valeur et de l'argent
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="regions-section">
+
+  <div class="regions-title">Géographie des échanges &amp; Pensée franciscaine <span class="new-badge">Ajout mémoire</span></div>
+
+  <!-- Grille des corridors régionaux -->
+  <div class="regions-grid">
+
+    <!-- Corridor toscan-ombrien -->
+    <div class="region-card corridor-toscan">
+      <span class="region-badge badge-toscan">Corridor toscan-ombrien</span>
+      <div class="region-card-title">Bologne · Assise · Florence</div>
+      <div class="region-card-thinker">Berceau du droit médiéval et de la rationalité contractuelle</div>
+      <div class="region-card-desc">
+        <p>À <strong>Bologne</strong>, le profil du risque est déjà réparti entre associés selon leur apport en argent et en travail, esquissant une <em>équité contractuelle</em> qui préfigure la théorie olivienne du <em>capitale</em> : l'argent exposé au risque mérite une rémunération parce qu'il cesse d'être une somme inerte pour devenir un bien productif.</p>
+        <p>Cette distinction usage/propriété, formulée à Assise puis codifiée à Bologne, est le germe de toute la rationalité économique franciscaine.</p>
+      </div>
+      <div class="region-stats">
+        <span class="region-stat-item">Rang betweenness : <strong>1 (Bologne) · 2 (Assise) · 3 (Florence)</strong></span>
+        <span class="region-stat-item">MW p = <strong>0.016</strong></span>
+      </div>
+    </div>
+
+    <!-- Axe méridional -->
+    <div class="region-card corridor-meridional">
+      <span class="region-badge badge-meridional">Axe méridional occidental</span>
+      <div class="region-card-title">Narbonne · Gênes · Barcelone</div>
+      <div class="region-card-thinker">Olivi · Alexandre d'Alexandrie · Eiximenis</div>
+      <div class="region-card-desc">
+        <p><strong>Narbonne</strong> (zone dense Montpellier–Perpignan) concentre communauté juive, viticulture et production textile (laine et tissus). Olivi y traduit juridiquement la pauvreté en théorie de la valeur : le marché est défini comme un ensemble d'échanges et de négociation selon des <em>règles moralement acceptables</em> — élément de socialité partagé par une communauté civique.</p>
+        <div class="region-olivi-quote">« La valeur des choses dépend du besoin qu'on en a, ce besoin n'étant lui-même que le résultat d'un choix d'une volonté subjective. »<br><em>— Olivi, Traité des contrats (Narbonne, ~1295)</em></div>
+        <p>La chaîne <em>Assise → Narbonne → Barcelone</em> constitue l'architecture intellectuelle du capitalisme marchand médiéval. <strong>Eiximenis</strong> institutionnalise cette pensée en droit public (<em>monte comune</em>).</p>
+      </div>
+      <div class="region-stats">
+        <span class="region-stat-item">Laine · Épices · Soieries</span>
+        <span class="region-stat-item">Axe fondamental Todeschini p.118</span>
+      </div>
+    </div>
+
+    <!-- Pôle parisien -->
+    <div class="region-card corridor-nord">
+      <span class="region-badge badge-nord">Pôle universitaire nord</span>
+      <div class="region-card-title">Paris · Oxford</div>
+      <div class="region-card-thinker">Bonaventure · Adam Marsh · Duns Scot</div>
+      <div class="region-card-desc">
+        <p><strong>Paris</strong> est le centre intellectuel où la doctrine franciscaine adapte la théologie de la pauvreté aux réalités du commerce capétien. <strong>Bonaventure</strong> articule mysticisme et rationalité scolastique, légitimant la pauvreté volontaire comme outil de compréhension du monde économique.</p>
+        <p><strong>Duns Scot</strong> à Oxford enrichit la réflexion sur la volonté et la valeur subjective — il déclare que les marchands jouent un rôle primordial dans la vie sociale, et qu'un souverain devrait en recruter davantage s'ils venaient à manquer.</p>
+      </div>
+      <div class="region-stats">
+        <span class="region-stat-item">Description et analyse géographique des échanges = enjeu central (nombreux textes franc.)</span>
+      </div>
+    </div>
+
+    <!-- Axe anglais -->
+    <div class="region-card corridor-anglais">
+      <span class="region-badge badge-anglais">Réseau anglais</span>
+      <div class="region-card-title">Londres · Oxford</div>
+      <div class="region-card-thinker">Jean Peckham · Adam Marsh</div>
+      <div class="region-card-desc">
+        <p><strong>Jean Peckham</strong>, archevêque de Canterbury et franciscain formé à Paris et Oxford, diffuse la pensée scolastique franciscaine en Angleterre. Londres est un centre commercial en expansion, carrefour du commerce de la laine anglaise vers le continent — la laine citée par Todeschini transitant précisément par les ports anglais vers les marchés flamands et italiens.</p>
+        <p>Ce corridor crée un lien fonctionnel entre la théorisation franciscaine de la valeur et la <em>pratique</em> marchande des grands ports de la laine.</p>
+      </div>
+      <div class="region-stats">
+        <span class="region-stat-item">Laine anglaise → Flandres → Toscane</span>
+      </div>
+    </div>
+
+  </div><!-- /regions-grid -->
+
+  <!-- Analyse olivienne de l'argent [NOUVEAU — clé pour la soutenance] -->
+  <div class="olivi-section" style="margin-top:1.1rem;">
+    <div class="olivi-section-title">La théorie olivienne de l'argent et de la valeur <span class="new-badge">Ajout mémoire</span></div>
+
+    <div style="font-size:0.82rem;line-height:1.72;color:var(--ink);margin-bottom:0.8rem;">
+      <p>À Narbonne, Olivi formule une vision <strong>fonctionnelle</strong> de l'argent radicalement nouvelle : l'argent n'est pas un objet précieux à accumuler, mais une <em>réalité utile lorsqu'une socialité amicale fait défaut</em>. Sa signification socialement positive réside dans la <strong>capacité des marchands à le faire circuler avec une valeur juste</strong> — à le vivre comme une unité de mesure et non un objet précieux, à l'utiliser sans l'accumuler.</p>
+      <p>Cette gestion de l'argent doit être confiée à des <em>professionnels de l'évaluation</em> qui échappent à la fascination et à la séduction exercées par le métal et à la recherche de son accumulation. Ce sont ces marchands probres — ni thésauriseurs, ni usuriers — que la cité doit soutenir et protéger.</p>
+    </div>
+
+    <div class="olivi-concept-grid">
+      <div class="olivi-concept">
+        <div class="olivi-concept-latin">Utilitas</div>
+        <div class="olivi-concept-fr">Utilité d'usage — le besoin réel que les biens satisfont <em>(≠ valeur intrinsèque)</em></div>
+      </div>
+      <div class="olivi-concept">
+        <div class="olivi-concept-latin">Raritas</div>
+        <div class="olivi-concept-fr">Rareté — la pénurie augmente la valeur <em>(anticipation de la loi de l'offre)</em></div>
+      </div>
+      <div class="olivi-concept">
+        <div class="olivi-concept-latin">Complacibilitas</div>
+        <div class="olivi-concept-fr">Désirabilité subjective — la valeur dépend du désir de l'acheteur <em>(proto-Menger)</em></div>
+      </div>
+      <div class="olivi-concept">
+        <div class="olivi-concept-latin">Capitale</div>
+        <div class="olivi-concept-fr">Argent exposé au risque → richesse séminale <em>(anticipation du capital financier)</em></div>
+      </div>
+      <div class="olivi-concept">
+        <div class="olivi-concept-latin">Necessitas</div>
+        <div class="olivi-concept-fr">Besoin réel — paradigme de l'évaluation franciscaine <em>(la pauvreté comme grille de lecture)</em></div>
+      </div>
+      <div class="olivi-concept">
+        <div class="olivi-concept-latin">Paupertas</div>
+        <div class="olivi-concept-fr">Perfection évangélique et <strong>mode économique idéal</strong> — paradigme de mesure de la valeur</div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem;padding:0.5rem 0.75rem;background:rgba(180,150,80,0.08);border-left:2.5px solid var(--border);font-size:0.78rem;color:var(--ink-faded);font-style:italic;line-height:1.65;">
+      <strong style="font-style:normal;color:var(--ink-light);">Inadéquation de l'argent :</strong> Olivi souligne l'inadéquation de l'argent à la représentation de la valeur des richesses et des besoins mondains. D'où la nécessité d'isoler l'<em>usage</em> de l'argent de sa <em>propriété</em> — biens catholiques dans les mains de cardinaux ou de laïcs amis spirituels de l'Ordre, dons redistributifs, administrateurs gérant un argent qui ne leur appartient pas. Majoritairement des jouissances momentanées des objets : manger, boire, étudier, voyager.
+    </div>
+  </div><!-- /olivi-section -->
+
+
+
+</div><!-- /regions-section -->
+</div>
+
+
+
+<!-- ── Bouton synthèse ── -->
+<button id="synth-btn" onclick="openSynth()">⊕ Synthèse, Régions &amp; Problématique</button>
+<div id="synth-overlay" onclick="closeSynth()"></div>
+
+<div id="synth-panel">
+  <div class="synth-header">
+    <h2>Synthèse — Géographie franciscaine &amp; Problématique <span class="new-badge" style="vertical-align:middle">v4</span></h2>
+    <p>C. Piralla — d'après Todeschini (2008) &amp; analyse spatiale DARMC</p>
+    <button class="synth-close" onclick="closeSynth()">✕</button>
+  </div>
+  <div class="synth-body">
+
+    <div class="synth-section">
+      <div class="synth-section-title">Problématique du mémoire</div>
+      <div class="synth-problematique">
+        Dans quelle mesure l'éthique franciscaine du XIIIe au XVe siècle a-t-elle contribué à structurer une forme de rationalité économique centrée sur l'usage et la circulation des richesses ?<br><br>
+        Plus précisément, comment l'analyse spatiale de l'implantation de l'Ordre permet-elle de matérialiser son insertion dans les réseaux marchands, et ainsi de nuancer la chronologie wébérienne de l'émergence de l'esprit du capitalisme ?
+      </div>
+    </div>
+
+    <div class="synth-section">
+      <div class="synth-section-title">Thèse spatiale d'ensemble</div>
+      <p>L'analyse de betweenness centrality sur 728 monastères confirme que la présence franciscaine n'est <strong>pas un simple effet de suivi</strong> des flux commerciaux existants. Les monastères situés à 100 km des villes identifiées par Todeschini présentent une centralité structurelle <strong>+112 % supérieure</strong> au reste du corpus (MW p=0.016), et 60 % des 20 hubs les plus centraux du réseau se concentrent autour de ces villes (MC p&lt;0.001).</p>
+      <p>Ce signal se cristallise autour de <strong>deux axes géographiques distincts</strong> que la carte illustre :</p>
+    </div>
+
+    <div class="synth-section">
+      <div class="synth-section-title">Les deux axes</div>
+      <div class="synth-axis toscan">
+        <div class="synth-axis-dot"></div>
+        <div class="synth-axis-text">
+          <strong>Corridor toscan-ombrien</strong> — Bologne · Assise · Florence<br>
+          Berceau du droit médiéval et de la rationalité contractuelle. Bologne (rang 1, btw +204 %) et Assise (rang 2, +59 %) concentrent les hubs les plus centraux du réseau. C'est ici que naît la distinction usage/propriété et la théorie olivienne du <em>capitale</em>.
+        </div>
+      </div>
+      <div class="synth-axis meridional">
+        <div class="synth-axis-dot"></div>
+        <div class="synth-axis-text">
+          <strong>Axe méridional occidental</strong> — Narbonne · Gênes · Barcelone<br>
+          Corridor de la laine, des épices et des soieries. Olivi à Narbonne traduit juridiquement la pauvreté en théorie de la valeur ; Eiximenis à Barcelone l'institutionnalise en droit public (<em>monte comune</em>). La chaîne Assise → Narbonne → Barcelone est l'architecture intellectuelle du capitalisme marchand médiéval.
+        </div>
+      </div>
+    </div>
+
+    <div class="synth-section">
+      <div class="synth-section-title">Résultats clés</div>
+      <div class="synth-result"><span class="synth-result-label">Betweenness groupe Todeschini vs reste</span><span class="synth-result-value">+112 % (p=0.016)</span></div>
+      <div class="synth-result"><span class="synth-result-label">Top 20 hubs dans zones Todeschini</span><span class="synth-result-value">12/20 (p&lt;0.001)</span></div>
+      <div class="synth-result"><span class="synth-result-label">Hub max — corridor toscan</span><span class="synth-result-value">Bologne +204 %</span></div>
+      <div class="synth-result"><span class="synth-result-label">Hubs proches grandes places ×2.2</span><span class="synth-result-value">p=0.002</span></div>
+    </div>
+
+    <div class="synth-section">
+      <div class="synth-section-title">Sur les villes sans monastères capturés</div>
+      <div class="synth-absence">
+        <strong>Note méthodologique :</strong> Paris, Londres, Marseille, Toulouse et Narbonne ne capturent aucun monastère dans leur buffer individuel. Cela tient en partie à un artefact de géoréférencement QGIS sur la couche DARMC (couverture incomplète au nord et au sud-ouest). Mais ce résultat est aussi <strong>historiquement cohérent</strong> : l'influence économique franciscaine documentée par Todeschini est avant tout <em>méditerranéenne et italienne</em> — c'est en Italie du centre-nord que la densité monastique est la mieux référencée et que le signal spatial est le plus robuste.
+      </div>
+    </div>
+
+    <!-- Ajouts pour le mémoire [NOUVEAU] -->
+    <div class="synth-section">
+      <div class="synth-section-title">Apports conceptuels — ce que la carte prouve <span class="new-badge">Ajout mémoire</span></div>
+      <p>La géographie franciscaine n'est pas un simple fait de présence physique. Elle matérialise une <strong>infrastructure de confiance</strong> : les couvents offrent aux marchands un capital symbolique — la légitimation religieuse de leur activité — en échange du capital matériel des dotations et aumônes (Evangelisti).</p>
+      <p>La <em>description et analyse de la géographie des échanges</em> constitue un enjeu central chez les franciscains, comme en témoignent leurs nombreux textes sur le sujet. C'est de cette géographie que naît l'<strong>émergence éthique civique</strong> : la morale n'est pas imposée de l'extérieur, elle est co-construite au carrefour des routes marchandes.</p>
+      <p>Le passage d'<em>Olivi à Eiximenis</em> illustre ce processus : Narbonne formule la théorie (valeur, contrat, usage), Barcelone l'institutionnalise en droit public (<em>monte comune</em>). La chaîne Assise → Narbonne → Barcelone est l'architecture intellectuelle du capitalisme marchand médiéval.</p>
+    </div>
+
+    <div class="synth-section">
+      <div class="synth-section-title">Limites et biais à mentionner <span class="new-badge">Soutenance</span></div>
+      <div class="synth-absence">
+        <strong>Biais d'endogénéité :</strong> La co-localisation franciscaine avec les pôles marchands ne prouve pas une causalité directe. Les Franciscains ont-ils précédé les marchés, ou suivi des flux préexistants ? L'analyse de sensibilité (25–100 km) montre que le signal est régional (100 km) et non de proximité immédiate, ce qui plaide pour une influence structurelle plutôt qu'une simple co-habitation.
+      </div>
+      <div style="margin-top:0.5rem;font-size:0.78rem;line-height:1.6;color:var(--ink);">
+        <strong>Perspective M2 :</strong> La lexicométrie sur les textes d'Olivi (R/UDPipe) permettrait de vérifier si les termes franciscains stricts (<em>utilitas, raritas, complacibilitas, iustitia</em>) diffusent dans les textes marchands laïcs postérieurs — Fibonacci (1202), Morelli (~1410), Cotrugli (1458) — confirmant sur le plan linguistique ce que la carte prouve spatialement.
+      </div>
+    </div>
+
+
+
+  </div>
+</div>
+
+
+<script>
+// ── Résultats globaux R (C. Piralla) ───────────────────────
+// Rayon retenu : 100 km (analyse de sensibilité : 25/50/75/100 km)
+// Rayon retenu : 100 km — MW p=0.016, MC top20 p<0.001
+// et cohérent avec la mobilité médiévale régionale.
+
+function rGlobal() {
+  return `
+  <div class="r-block">
+    <div class="r-block-title">Structure du réseau (k=4, 728 monastères)</div>
+    <div class="r-stat"><span class="r-stat-label">Composante principale</span><span class="r-stat-value sig">584 / 728 (80 %)</span></div>
+    <div class="r-stat"><span class="r-stat-label">Composantes isolées</span><span class="r-stat-value neutral">144 (7 composantes)</span></div>
+    <div class="r-stat"><span class="r-stat-label">Betweenness médiane</span><span class="r-stat-value">0.0109</span></div>
+    <div class="r-stat"><span class="r-stat-label">Betweenness max</span><span class="r-stat-value sig">0.500</span></div>
+  </div>
+  <div class="r-block">
+    <div class="r-block-title">Hubs × villes majeures — Monte Carlo (100 km)</div>
+    <div class="r-stat"><span class="r-stat-label">Hubs top 10 %</span><span class="r-stat-value">59</span></div>
+    <div class="r-stat"><span class="r-stat-label">Proportion observée</span><span class="r-stat-value sig">28.8 %</span></div>
+    <div class="r-stat"><span class="r-stat-label">Aléatoire moyen</span><span class="r-stat-value neutral">13.4 %</span></div>
+    <div class="r-stat"><span class="r-stat-label">IC 95 % aléatoire</span><span class="r-stat-value neutral">[ 5.1 % — 22 % ]</span></div>
+    <div class="r-stat"><span class="r-stat-label">p-value</span><span class="r-stat-value sig">0.002 ✓</span></div>
+    <div class="r-interp">Les hubs franciscains sont 2.2× plus proches des grandes places commerciales qu'attendu par hasard — résultat fortement significatif (p=0.002), confirmant la co-localisation franciscaine avec les centres nerveux du commerce européen médiéval.</div>
+  </div>
+  <div class="r-block">
+    <div class="r-block-title">Validation Todeschini — 10/11 villes (100 km)</div>
+    <div class="r-stat"><span class="r-stat-label">Effectif groupe Todeschini</span><span class="r-stat-value sig">130 monastères</span></div>
+    <div class="r-stat"><span class="r-stat-label">Btw moy. Todeschini</span><span class="r-stat-value sig">0.065 (+112 %)</span></div>
+    <div class="r-stat"><span class="r-stat-label">Btw moy. reste</span><span class="r-stat-value neutral">0.031</span></div>
+    <div class="r-stat"><span class="r-stat-label">p-value Mann-Whitney</span><span class="r-stat-value sig">0.016 ✓</span></div>
+    <div class="r-stat"><span class="r-stat-label">Top 20 hubs × Todeschini</span><span class="r-stat-value sig">12 / 20 (Bologne + Florence)</span></div>
+    <div class="r-stat"><span class="r-stat-label">p-value Monte Carlo top 20</span><span class="r-stat-value sig">&lt; 0.001 ✓✓</span></div>
+    <div class="r-interp">Résultats doublement significatifs : Mann-Whitney confirme une betweenness structurellement supérieure dans les zones Todeschini (p=0.016) ; le Monte Carlo top 20 est très fortement significatif (p&lt;0.001) — 60 % des 20 hubs les plus centraux sont proches d'une ville Todeschini, contre 22 % attendu aléatoirement.</div>
+  </div>
+  <div class="r-block">
+    <div class="r-block-title">Analyse de sensibilité — rayon du buffer</div>
+    <div class="r-stat"><span class="r-stat-label">25 km — MW p</span><span class="r-stat-value neutral">0.141 | MC p=0.073</span></div>
+    <div class="r-stat"><span class="r-stat-label">50 km — MW p</span><span class="r-stat-value neutral">0.148 | MC p=0.004</span></div>
+    <div class="r-stat"><span class="r-stat-label">75 km — MW p</span><span class="r-stat-value warn">0.039 ✓ | MC p&lt;0.001</span></div>
+    <div class="r-stat"><span class="r-stat-label">100 km — MW p</span><span class="r-stat-value sig">0.016 ✓ | MC p&lt;0.001 ✓✓</span></div>
+    <div class="r-interp">100 km retenu : rayon maximisant la significativité des deux tests, cohérent avec la mobilité régionale médiévale (Szabó & Ohler, 1992). L'absence de signal Mann-Whitney à 25–50 km indique que l'insertion franciscaine opère à l'échelle régionale, non à la proximité immédiate.</div>
+  </div>`;
+}
+
+const data = {
+
+  oxford: {
+    city: "Oxford", absent: false,
+    thinker: "Adam Marsh · Roger Bacon · Duns Scot",
+    tag: { text: "Centre universitaire", cls: "tag-blue" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p>Oxford est l'un des premiers foyers de la pensée franciscaine en Angleterre. <strong>Adam Marsh</strong> (v. 1200–1259), proche de Robert Grosseteste, y développe une théologie attentive aux réalités concrètes de la vie économique. <strong>Duns Scot</strong> (v. 1266–1308) enrichit la réflexion sur la volonté et la valeur subjective, complétant le cadre philosophique dans lequel la pensée économique franciscaine s'élabore. Duns Scot ira même jusqu'à déclarer que les marchands jouent un rôle primordial dans l'organisation de la vie sociale, et qu'un souverain devrait chercher à en recruter davantage s'ils venaient à manquer dans son royaume.</p>
+      </div>
+    </div>`,
+    footer: "Sources : DARMC ; Todeschini (2008) | Analyse : C. Piralla"
+  },
+
+  paris: {
+    city: "Paris", absent: false,
+    thinker: "Bonaventure de Bagnoregio (v. 1221–1274)",
+    tag: { text: "Pôle théologique", cls: "tag-teal" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p><strong>Bonaventure</strong>, ministre général de l'Ordre et maître à Paris, représente l'articulation entre mysticisme franciscain et rationalité scolastique. Sa pensée contribue à légitimer la pauvreté volontaire comme outil de compréhension du monde économique. Paris est le lieu où la doctrine franciscaine adapte la théologie de la pauvreté aux réalités du commerce capétien, confirmant que l'Ordre se positionne délibérément dans les nœuds névralgiques de la circulation des biens et des idées.</p>
+      </div>
+    </div>`,
+    footer: "Sources : Todeschini (2008) ; Langholm (1992) | Analyse : C. Piralla"
+  },
+
+  toulouse: {
+    city: "Toulouse", absent: false,
+    thinker: "Guiral Ot (Geraldus Odonis, v. 1285–1444)",
+    tag: { text: "Transmission institutionnelle", cls: "tag-gold" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p><strong>Guiral Ot</strong>, ministre général de l'Ordre, est l'un des grands transmetteurs de la pensée économique olivienne au XIVe siècle. Il codifie la doctrine de la pauvreté et en diffuse les implications économiques dans tout l'Ordre.</p>
+      </div>
+    </div>
+    <div class="ctx-section">
+      <div class="ctx-section-title">Analyse — C. Piralla</div>
+      <div class="panel-desc">
+        <p>Guiral Ot affirme que faire obstacle au profit légitime du marchand équivaut à commettre un péché mortel contre l'État. Le marchand et son réseau familial s'affirment ainsi comme le noyau d'un gouvernement rationnel, où la gestion des comportements privés — mariage, héritage et assiduité aux pratiques de l'Église — devient la condition nécessaire à la prospérité et au bonheur public. Toulouse est un carrefour commercial majeur entre la Méditerranée et l'Atlantique, et c'est précisément là que cette théorisation de la légitimité marchande prend toute sa dimension politique.</p>
+      </div>
+    </div>`,
+    footer: "Sources : Todeschini (2008) ; DARMC | Analyse : C. Piralla"
+  },
+
+  marseille: {
+    city: "Marseille", absent: false,
+    thinker: "Hugues de Digne (v. 1200–1258)",
+    tag: { text: "Pôle franciscain méditerranéen", cls: "tag-teal" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p><strong>Hugues de Digne</strong>, franciscain provençal de la branche rigoriste, diffuse la doctrine de l'<em>usus pauper</em> dans le monde méditerranéen. Prédicateur influent, il ancre la réflexion franciscaine sur la pauvreté dans une réalité portuaire et commerciale active. Marseille est un port majeur au XIIIe siècle, carrefour entre le commerce levantin et les routes terrestres vers l'intérieur, par lequel transitent les épices, soieries et laines citées par Todeschini.</p>
+      </div>
+    </div>`,
+    footer: "Sources : DARMC ; Todeschini (2008) | Analyse : C. Piralla"
+  },
+
+  genes: {
+    city: "Gênes", absent: false,
+    thinker: "Alexandre d'Alexandrie (v. 1268–1314)",
+    tag: { text: "Pôle commercial & théologique", cls: "tag-teal" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p>Gênes est au XIIIe siècle la première place financière de la Méditerranée occidentale. <strong>Alexandre d'Alexandrie</strong> travaille sur les fondements théologiques du contrat et du prêt, dans la lignée directe d'Olivi.</p>
+      </div>
+    </div>
+    <div class="ctx-section">
+      <div class="ctx-section-title">Analyse — C. Piralla</div>
+      <div class="panel-desc">
+        <p>Selon l'analyse de Todeschini, Eiximenis théorise au XIVe siècle le prêt public (<em>monte comune</em>) comme contrat social convertissant la richesse privée en utilité civile — un modèle dont Gênes, Florence et Barcelone sont les laboratoires. Dans ce cadre, le marchand est une figure vertueuse dont le labeur et l'acceptation du risque rendent l'argent fertile, participant à la vitalité organique de la cité. À l'opposé, l'usurier est exclu de la citoyenneté car il stérilise la richesse sans générer de bien commun.</p>
+      </div>
+    </div>`,
+    footer: "Sources : Chiaudano & Moresco (1935) ; DARMC ; Todeschini (2008) | Analyse : C. Piralla"
+  },
+
+  florence: {
+    city: "Florence", absent: false,
+    thinker: "Pôle commercial toscan — ★ Rang 3 betweenness",
+    tag: { text: "Résultat clé — rang 3 betweenness", cls: "tag-teal" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p>Florence représente au XIIIe–XIVe siècle l'un des pôles du capitalisme toscan, avec les grandes compagnies bancaires (Bardi, Peruzzi). Sa proximité géographique avec Assise et Bologne la rend particulièrement sensible aux influences franciscaines.</p>
+      </div>
+    </div>
+    <div class="ctx-section">
+      <div class="ctx-section-title">Analyse — C. Piralla</div>
+      <div class="panel-desc">
+        <p>Selon l'analyse de Todeschini, Eiximenis théorise le <em>monte comune</em> en s'appuyant sur le modèle toscan, où la richesse privée se convertit en utilité civile. Florence incarne la maturité de ce modèle : le crédit institutionnalisé devient un instrument politique de cohésion sociale, où la monnaie circule pour garantir la stabilité collective. L'analyse spatiale confirme ce rôle : Florence se classe au rang 3 parmi les villes Todeschini testables, avec une betweenness moyenne de 0.030 sur 30 monastères dans son buffer.</p>
+      </div>
+    </div>`,
+    r: `<div class="r-block">
+      <div class="r-block-title">Profil spatial — Florence (rang 3)</div>
+      <div class="r-stat"><span class="r-stat-label">Monastères dans le buffer</span><span class="r-stat-value sig">30</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw moyenne</span><span class="r-stat-value warn">0.030 (−22 % / global)</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw médiane</span><span class="r-stat-value">0.014</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw max</span><span class="r-stat-value sig">0.325</span></div>
+      <div class="r-stat"><span class="r-stat-label">% top 10 %</span><span class="r-stat-value warn">6.7 % (2 monastères)</span></div>
+      <div class="r-stat"><span class="r-stat-label">Rang parmi villes Todeschini</span><span class="r-stat-value warn">3 / 10</span></div>
+      <div class="r-interp">Florence contribue au résultat Monte Carlo top 20 via ses 2 monastères dans le top 10 %. La médiane (0.014) reste comparable aux autres villes, indiquant une présence franciscaine ancrée même si moins concentrée en hubs exceptionnels qu'à Bologne.</div>
+    </div>
+    <div style="margin-top:0.7rem;padding:0.45rem 0.7rem;background:rgba(139,26,26,0.06);border-left:2.5px solid var(--red);border-radius:0 3px 3px 0;font-size:0.77rem;font-style:italic;color:var(--ink-faded);">
+      → Résultats globaux (MW p=0.016, MC p&lt;0.001) : <button onclick="openSynth()" style="background:none;border:none;color:var(--red);font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.04em;cursor:pointer;text-decoration:underline;padding:0;">voir Synthèse &amp; Problématique</button>
+    </div>
+    `,
+    footer: "Sources : DARMC ; Todeschini (2008) | Analyse spatiale : C. Piralla"
+  },
+
+  barcelone: {
+    city: "Barcelone · Valence", absent: false,
+    thinker: "Francesc Eiximenis (v. 1330–1409)",
+    tag: { text: "Institutionnalisation — XIVe s.", cls: "tag-red" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p><strong>Francesc Eiximenis</strong> accomplit le passage décisif de la théologie au droit public. Il théorise le prêt municipal (<em>monte comune</em>) comme contrat social fondé sur le renoncement franciscain à la jouissance immédiate, faisant des marchands la « colonne de l'État » et la « vie des lieux ».</p>
+      </div>
+    </div>
+    <div class="ctx-section">
+      <div class="ctx-section-title">Analyse — C. Piralla</div>
+      <div class="panel-desc">
+        <p>Entre le XIVe et le XVe siècle, l'idéologie franciscaine transforme l'économie en socle sacré et organique de la cité. Eiximenis justifie la richesse par sa circulation créatrice (<em>industria</em>) et son utilité publique, exigeant en contrepartie une exclusion radicale des figures jugées stériles — juifs, thésauriseurs, oisifs. Ce modèle, dont l'inspiration remonte explicitement à Assise et Narbonne, est l'aboutissement institutionnel de toute la chaîne franciscaine : Assise → Narbonne → Barcelone.</p>
+      </div>
+    </div>`,
+    footer: "Sources : Todeschini (2008) ; Evangelisti ; Riera i Melis | Analyse : C. Piralla"
+  },
+
+  // VILLES INTERPOLÉES
+
+  narbonne: {
+    city: "Narbonne", absent: true,
+    thinker: "Pierre de Jean Olivi (1248–1298)",
+    tag: { text: "Nœud central — théorie de la valeur", cls: "tag-red" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p>Narbonne est le cœur intellectuel de l'économie franciscaine. <strong>Pierre de Jean Olivi</strong> y rédige son <em>Traité des contrats</em>, fondement de l'analyse de Todeschini dans <em>Richesse franciscaine</em>.</p>
+      </div>
+    </div>
+    <div class="ctx-section">
+      <div class="ctx-section-title">Analyse — C. Piralla <span class="new-badge">Enrichi p.118</span></div>
+      <div class="panel-desc">
+        <p>Narbonne au XIIIe siècle est caractérisée par une présence importante de la communauté juive, tournée vers les activités du prêt commercial, de la viticulture et de la production textile (laine et tissus). Elle se situe dans une zone de dense agglomération entre Montpellier et Perpignan — un carrefour où convergent les itinéraires de la laine, des soies et des épices identifiés par Todeschini (p. 118).</p>
+        <p>Olivi y traduit juridiquement la pauvreté au travers de la <em>nécessité</em> — le besoin réel que les biens satisfont — définissant ainsi le marché comme <em>un ensemble d'échanges et de négociation sur la valeur et le prix de choses commerçables selon des règles moralement acceptables</em>, élément de socialité partagé par une communauté civique.</p>
+        <p>Sa réflexion conduit à une réélaboration de la valeur des produits agricoles en fonction de la pauvreté de ceux qui en ont besoin. La nécessité d'isoler l'<em>usage</em> de l'argent de sa <em>propriété</em> (administrateurs gérant un argent qui ne leur appartient pas, dons envers le Christ redistribués aux pauvres) est au cœur du <em>Traité des contrats</em>.</p>
+      </div>
+    </div>
+    <div class="ctx-section">
+      <div class="ctx-section-title">La vision olivienne de l'argent (p.118) <span class="new-badge">Nouveau</span></div>
+      <div class="panel-desc">
+        <div class="panel-quote">« La valeur des choses dépend du besoin qu'on en a, ce besoin n'étant lui-même que le résultat d'un choix d'une volonté subjective. » — Olivi, <em>Traité des contrats</em></div>
+        <p>L'argent est <strong>réalité utile lorsqu'une socialité amicale fait défaut</strong> — vision fonctionnelle. Il doit être géré par des <em>professionnels de l'évaluation</em> qui échappent à la fascination du métal et à la recherche de son accumulation. La signification socialement positive de l'argent réside dans la <strong>capacité des marchands à le faire circuler avec une valeur juste</strong>, à le vivre comme une unité de mesure et non un objet précieux.</p>
+        <p>Pauvreté = perfection évangélique / mode économique idéal et fondamentalement chrétien. Ce paradigme, né à Narbonne, irrigue toute la chaîne Assise → Narbonne → Barcelone.</p>
+      </div>
+    </div>`,
+    footer: "Sources : Piron (1998) ; Todeschini (2008) p.118 ; Langholm (1992) | Analyse : C. Piralla"
+  },
+
+  assise: {
+    city: "Assise", absent: true,
+    thinker: "Saint François d'Assise (v. 1181–1226)",
+    tag: { text: "Foyer originel de l'Ordre", cls: "tag-gold" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p><strong>François d'Assise</strong> fonde l'Ordre en 1209 sur le principe du <em>dominium</em> renoncé : les frères ne peuvent ni posséder ni utiliser juridiquement les biens, mais seulement en faire <em>usage de fait</em>. Cette distinction inaugurale est le germe de toute la rationalité économique franciscaine. Todeschini insiste : l'Assise de François n'est pas une ville de retrait du monde, mais un point nodal des routes de la laine ombrienne. La pauvreté volontaire naît au contact du capitalisme marchand naissant, et c'est depuis ce paradoxe fondateur que se déploie toute la chaîne intellectuelle vers Narbonne puis Barcelone.</p>
+      </div>
+    </div>`,
+    r: `<div class="r-block">
+      <div class="r-block-title">Profil spatial — Assise (rang 2)</div>
+      <div class="r-stat"><span class="r-stat-label">Monastères dans le buffer</span><span class="r-stat-value sig">74</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw moyenne</span><span class="r-stat-value sig">0.061 (+59 % / global)</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw médiane</span><span class="r-stat-value">0.014</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw max</span><span class="r-stat-value sig">0.471</span></div>
+      <div class="r-stat"><span class="r-stat-label">% top 10 %</span><span class="r-stat-value sig">18.9 % (14 monastères)</span></div>
+      <div class="r-stat"><span class="r-stat-label">Rang parmi villes Todeschini</span><span class="r-stat-value sig">2 / 10</span></div>
+      <div class="r-interp">Assise concentre le plus grand nombre de monastères testables (74) avec une betweenness nettement supérieure au corpus global (+59 %). Son buffer capture 14 hubs du top 10 %, ce qui en fait le contributeur le plus important en volume au résultat global.</div>
+    </div>
+    <div class="r-missing">
+      <strong>⚠ Position interpolée</strong> — Assise absente de la couche DARMC. Coordonnées WGS84 (43.070°N, 12.619°E) converties en EPSG:3035 réel : X=4 534 877, Y=2 221 798.
+    </div>
+    <div style="margin-top:0.7rem;padding:0.45rem 0.7rem;background:rgba(139,26,26,0.06);border-left:2.5px solid var(--red);border-radius:0 3px 3px 0;font-size:0.77rem;font-style:italic;color:var(--ink-faded);">
+      → Résultats globaux (MW p=0.016, MC p&lt;0.001) : <button onclick="openSynth()" style="background:none;border:none;color:var(--red);font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.04em;cursor:pointer;text-decoration:underline;padding:0;">voir Synthèse &amp; Problématique</button>
+    </div>
+    `,
+    footer: "Sources : Todeschini (2008) ; Bruni (2012) | Analyse : C. Piralla"
+  },
+
+  bologne: {
+    city: "Bologne", absent: true,
+    thinker: "Centre du droit médiéval — ★ Rang 1 betweenness",
+    tag: { text: "Rationalité du contrat — ★ Rang 1", cls: "tag-grey" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p>Bologne constitue le berceau du droit médiéval et de la théorie des contrats. C'est ici que se forge, dès le XIIe siècle, le cadre juridique dans lequel la pensée économique franciscaine va s'inscrire.</p>
+      </div>
+    </div>
+    <div class="ctx-section">
+      <div class="ctx-section-title">Analyse — C. Piralla</div>
+      <div class="panel-desc">
+        <p>Au XIIIe siècle à Bologne, le profil du risque est déjà réparti entre associés selon leur apport en argent et en travail, esquissant une équité contractuelle. D'après Todeschini (p.118), ce profil dispersé entre associés selon la prise de risque préfigure directement la théorie olivienne du <em>capitale</em> : l'argent exposé au risque mérite une rémunération parce qu'il cesse d'être une somme inerte pour devenir un bien productif.</p>
+        <p>Bologne est le résultat le plus fort de l'analyse spatiale : elle se classe au <strong>rang 1 de betweenness</strong> parmi toutes les villes Todeschini, avec une moyenne de 0.116 soit +204 % par rapport à la moyenne globale du corpus.</p>
+      </div>
+    </div>`,
+    r: `<div class="r-block">
+      <div class="r-block-title">Profil spatial — Bologne (rang 1)</div>
+      <div class="r-stat"><span class="r-stat-label">Monastères dans le buffer</span><span class="r-stat-value sig">26</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw moyenne</span><span class="r-stat-value sig">0.116 (+204 % / global)</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw médiane</span><span class="r-stat-value">0.007</span></div>
+      <div class="r-stat"><span class="r-stat-label">Btw max</span><span class="r-stat-value sig">0.484</span></div>
+      <div class="r-stat"><span class="r-stat-label">% top 10 %</span><span class="r-stat-value sig">30.8 % (8 monastères)</span></div>
+      <div class="r-stat"><span class="r-stat-label">Rang parmi villes Todeschini</span><span class="r-stat-value sig">1 / 10</span></div>
+      <div class="r-interp">Bologne est le hub le plus central de toutes les villes Todeschini testables. La forte asymétrie entre moyenne (0.116) et médiane (0.007) signale la présence de quelques monastères exceptionnellement centraux — signature d'un réseau hiérarchisé.</div>
+    </div>
+    <div class="r-missing">
+      <strong>⚠ Position interpolée</strong> — Bologne absente de la couche DARMC. Coordonnées WGS84 (44.494°N, 11.343°E) converties en EPSG:3035 réel : X=4 428 027, Y=2 376 868.
+    </div>
+    <div style="margin-top:0.7rem;padding:0.45rem 0.7rem;background:rgba(139,26,26,0.06);border-left:2.5px solid var(--red);border-radius:0 3px 3px 0;font-size:0.77rem;font-style:italic;color:var(--ink-faded);">
+      → Résultats globaux (MW p=0.016, MC p&lt;0.001) : <button onclick="openSynth()" style="background:none;border:none;color:var(--red);font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.04em;cursor:pointer;text-decoration:underline;padding:0;">voir Synthèse &amp; Problématique</button>
+    </div>
+    `,
+    footer: "Sources : Langholm (1992) ; Todeschini (2008) | Analyse : C. Piralla"
+  },
+
+  londres: {
+    city: "Londres", absent: true,
+    thinker: "Jean Peckham (v. 1230–1292)",
+    tag: { text: "Pôle franciscain anglais", cls: "tag-grey" },
+    ctx: `
+    <div class="ctx-section">
+      <div class="ctx-section-title">Contexte historique</div>
+      <div class="panel-desc">
+        <p><strong>Jean Peckham</strong>, archevêque de Canterbury et franciscain, est un grand diffuseur de la pensée scolastique franciscaine en Angleterre. Formé à Paris et Oxford, il incarne la connexion entre les pôles intellectuels de l'Ordre. Londres est au XIIIe siècle un centre commercial en pleine expansion, carrefour du commerce de la laine anglaise vers le continent — la laine citée par Todeschini transitant précisément par les ports anglais vers les marchés flamands et italiens.</p>
+      </div>
+    </div>`,
+    r: `<div class="r-block">
+      <div class="r-block-title">Londres dans l'analyse spatiale</div>
+      <div class="r-stat"><span class="r-stat-label">Monastères capturés (100 km)</span><span class="r-stat-value warn">0</span></div>
+      <div class="r-stat"><span class="r-stat-label">Groupe Todeschini global (n=130)</span><span class="r-stat-value sig">Contribue au test MW</span></div>
+      <div class="r-interp">Londres ne capture aucun monastère dans son buffer propre. Contribue au groupe Todeschini global (btw +112 %, MW p=0.016).</div>
+    </div>
+    <div class="r-missing">
+      <strong>⚠ Position interpolée</strong> — Coordonnées WGS84 (51.508°N, −0.118°E) converties en EPSG:3035 : X=3 621 120, Y=3 203 875.
+    </div>`,
+    footer: "Sources : Todeschini (2008) ; DARMC | Analyse : C. Piralla"
+  }
+};
+
+let activeCity = null;
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pane-' + tabId).classList.add('active');
+}
+
+const NO_R_CITIES = new Set(['oxford','paris','marseille','toulouse','genes','barcelone','narbonne','londres']);
+
+function showPanel(cityKey) {
+  const d = data[cityKey];
+  if (!d) return;
+  document.querySelectorAll('.city-dot').forEach(el => el.classList.remove('active'));
+  const dot = document.querySelector(`[data-city="${cityKey}"]`);
+  if (dot) dot.classList.add('active');
+  document.getElementById('panel-city').textContent = d.city;
+  document.getElementById('panel-thinker').textContent = d.thinker;
+  const tagRow = document.getElementById('panel-tag-row');
+  let tagHTML = `<span class="panel-tag ${d.tag.cls}">${d.tag.text}</span>`;
+  if (d.absent) tagHTML += `<span class="absent-badge">◌ Position interpolée</span>`;
+  tagRow.innerHTML = tagHTML;
+  document.getElementById('panel-ctx').innerHTML = d.ctx;
+  document.getElementById('panel-r').innerHTML = d.r || '<p style="font-size:0.8rem;color:var(--ink-faded);font-style:italic">Données non disponibles.</p>';
+  document.getElementById('panel-footer').textContent = d.footer;
+  // Reset all tabs first
+  document.querySelectorAll('.panel-tab').forEach(t => { t.classList.remove('active'); t.style.display = ''; });
+  document.querySelectorAll('.panel-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.panel-tab')[0].classList.add('active');
+  document.getElementById('pane-contexte').classList.add('active');
+  // Hide R tab for non-significant cities
+  if (NO_R_CITIES.has(cityKey)) {
+    const rTab = document.querySelectorAll('.panel-tab')[1];
+    if (rTab) rTab.style.display = 'none';
+  }
+  document.getElementById('info-panel').classList.add('visible');
+  activeCity = cityKey;
+}
+
+function closePanel() {
+  document.getElementById('info-panel').classList.remove('visible');
+  document.querySelectorAll('.city-dot').forEach(el => el.classList.remove('active'));
+  activeCity = null;
+}
+
+document.querySelector('.map-container').addEventListener('click', function(e) {
+  if (!e.target.closest('#info-panel') && !e.target.closest('.city-dot')) closePanel();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+function openSynth() {
+  document.getElementById('synth-panel').classList.add('open');
+  document.getElementById('synth-overlay').classList.add('active');
+}
+function closeSynth() {
+  document.getElementById('synth-panel').classList.remove('open');
+  document.getElementById('synth-overlay').classList.remove('active');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSynth(); });
+
+// Apply axis ring colors via JS based on data-axis attribute
+document.querySelectorAll('.city-dot[data-axis]').forEach(el => {
+  const axis = el.getAttribute('data-axis');
+  el.classList.add('axis-' + axis);
+});
+
+
+</script>
+</body>
+</html>
